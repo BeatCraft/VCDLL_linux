@@ -6,6 +6,7 @@
 	Windows版とインターフェスを合わせた最初のバージョン。
 	静止画キャプチャには本バージョンでは対応しない。
 */
+#define DEBUG_FLAG 0
 
 #define DISABLE_PREVIEW
 
@@ -271,8 +272,9 @@ static void* _preview_thread(void* data)
   	struct timeval tv;
   	struct v4l2_buffer buf;
   	
+#if DEBUG_FLAG
   	printf("Preview thread start\n");
-	
+#endif
 	while (!thread->tear_down) {
 		FD_ZERO(&fds);
   		FD_SET(self->devfd, &fds);
@@ -312,7 +314,9 @@ static void* _preview_thread(void* data)
     		fprintf(stderr, "Preview thread: VIDIOC_QBUF failed(%d)\n", errno);
     	}
 	}
+#if DEBUG_FLAG
 	printf("Preview thread exit\n");
+#endif
 	return (void*)0;
 }
 
@@ -1095,8 +1099,9 @@ long Dev_EnumDevice(void)
          
         /* usb_device_get_devnode() returns the path to the device node itself in /dev. */
         const char *v4l2_device = udev_device_get_devnode(dev);
+#if DEBUG_FLAG
         printf("V4L2_CORE: Device Node Path: %s\n", v4l2_device);
-        
+#endif
         int fd = 0;
         /* open the device and query the capabilities */
         if ((fd = v4l2_open(v4l2_device, O_RDWR | O_NONBLOCK, 0)) < 0)
@@ -2070,7 +2075,9 @@ bool Dev_SetGain(DevObject* self, long gain)
 {
   	struct v4l2_control control;
   	long min, max, step, def;
-printf("Dev_SetGain: %ld\n", gain);  
+#if DEBUG_FLAG
+    printf("Dev_SetGain: %ld\n", gain);
+#endif
   	if (self == NULL) return false;
 
   	Dev_GetGainRange(self, &min, &max, &step, &def);
@@ -2198,7 +2205,9 @@ bool Dev_GetCanStillCapture(DevObject* self,
 	if (self == NULL) return false;
 	
 #ifdef SUPPORT_STILL_CAPTURE
+#if DEBUG_FLAG
   	printf("Dev_GetCanStillCapture:\n");
+#endif
   	return get_xu_value(self->devfd,
   					 	canStillCapture,
                       	BEAT_CTRL_CAN_STILL,
