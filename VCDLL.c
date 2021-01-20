@@ -838,7 +838,9 @@ bool open_device(DevObject* self)
 bool close_device(DevObject* self)
 {
 	if(-1 == close(self->devfd)) {
-    	printf("ERROR: close(fd)\n");
+        // switch to stderr
+    	// printf("ERROR: close(fd)\n");
+        fprintf(stderr, "ERROR: close(fd)\n");
     	return false;
   	}
   	
@@ -1322,9 +1324,10 @@ bool Dev_SetFormatIndex(DevObject* self, int index)
     	// RAW8
     	self->currentImageSize = cap->width * cap->height;
     }
-
-	fprintf(stdout, "Dev_SetFormatIndex: idx:%d %ldx%ld %ldbit size=%ld\n", 
+#if DEBUG_FLAG
+    fprintf(stdout, "Dev_SetFormatIndex: idx:%d %ldx%ld %ldbit size=%ld\n",
 			index, cap->width, cap->height, cap->bitPerPixel, self->currentImageSize);
+#endif
 	//printf("Dev_SetFormatbyIndex done\n");
   	return true;
 }
@@ -1680,10 +1683,10 @@ bool Dev_SetStillFormatIndex(DevObject* self, int index)
     	// RAW8
     	self->currentStillImageSize = cap->width * cap->height;
     }
-    
+#if DEBUG_FLAG
     fprintf(stdout, "Dev_SetStillFormatIndex: idx:%d %ldx%ld %ldbit size=%ld\n", 
 			index, cap->width, cap->height, cap->bitPerPixel, self->currentStillImageSize);
-			
+#endif
     return true;
 
 #else  // !SUPPORT_STILL_CAPTURE
@@ -1854,7 +1857,9 @@ bool Dev_StillTrigger(DevObject* self)
 	if (!Dev_IsSupportStillCapture(self))
 		return false;
 	
+#if DEBUG_FLAG
 	fprintf(stdout, "Dev_StillTrigger: format index = %ld\n", self->stillFormatInfo.currentFormatIndex);
+#endif
 #ifdef SUPPORT_STILL_CAPTURE
   	struct v4l2_control ctrl;
   	CLEAR(ctrl);
@@ -1936,8 +1941,10 @@ void* Dev_GetStillBuffer(DevObject* self, int milsec)
 		ret_buffer = NULL;
 		goto out;
 	}
+#if DEBUG_FLAG
   	fprintf(stdout, "Dev_GetStillBuffer: Bbuffer received size: %d/%lu\n", 
 				buf.bytesused, self->currentStillImageSize);
+#endif
   	/* バッファを別のポインタへ退避 */
   	long index = self->stillFormatInfo.currentFormatIndex;
   	CapFormat* cap = &self->stillFormatInfo.formats[index];
